@@ -42,11 +42,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout',  [AuthController::class, 'logout']);
 
     // --------------------------------------------------------
-    // USER PROFILE
+    // USER & PROFILE
     // --------------------------------------------------------
     Route::get('/user/profile',  [UserController::class, 'profile']);
     Route::post('/user/profile', [UserController::class, 'updateProfile']);
+    Route::get('/users',         [UserController::class, 'index']); // Search users
     Route::get('/users/{id}',    [UserController::class, 'show']);
+
+    // --------------------------------------------------------
+    // FOLLOW SYSTEM
+    // --------------------------------------------------------
+    Route::post('/follow/{id}',   [\App\Http\Controllers\Api\FollowController::class, 'follow']);
+    Route::delete('/unfollow/{id}', [\App\Http\Controllers\Api\FollowController::class, 'unfollow']);
+
+    // --------------------------------------------------------
+    // NOTIFICATIONS
+    // --------------------------------------------------------
+    Route::get('/notifications',             [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::patch('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
 
     // --------------------------------------------------------
     // POSTS

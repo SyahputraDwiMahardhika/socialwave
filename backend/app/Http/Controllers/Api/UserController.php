@@ -28,6 +28,7 @@ class UserController extends Controller
     public function profile(Request $request): JsonResponse
     {
         $user = $request->user();
+        $user->loadCount(['followers', 'following']);
 
         // Build response with computed profile picture URL
         $data = array_merge($user->toArray(), [
@@ -100,15 +101,39 @@ class UserController extends Controller
     public function show(int $id): JsonResponse
     {
         // Find user or return 404
-        $user = \App\Models\User::findOrFail($id);
+        $user = \App\Models\User::withCount(['followers', 'following'])->findOrFail($id);
 
-        $data = array_merge($user->only(['id', 'name', 'bio', 'role', 'created_at']), [
+        $data = array_merge($user->only(['id', 'name', 'bio', 'role', 'created_at', 'followers_count', 'following_count']), [
             'profile_picture_url' => $user->profile_picture_url,
         ]);
 
         return response()->json([
             'success' => true,
             'data'    => $data,
+        ]);
+    }
+
+    public function index(Request $request): JsonResponse
+    {
+        $query = \App\Models\User::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('name', 'LIKE', "%{$search}%");
+        }
+
+        $users = $query->withCount(['followers', 'following'])->paginate(20);
+
+        // Map to include profile_picture_url
+        $users->getCollection()->transform(function ($user) {
+            $data = $user->only(['id', 'name', 'bio', 'role', 'created_at', 'followers_count', 'following_count']);
+            $data['profile_picture_url'] = $user->profile_picture_url;
+            return $data;
+        });
+
+        return response()->json([
+            'success' => true,
+            'data'    => $users,
         ]);
     }
 }

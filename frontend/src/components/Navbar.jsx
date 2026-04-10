@@ -10,6 +10,7 @@ import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Navbar as BSNavbar, Nav, Container, Dropdown } from 'react-bootstrap'
+import NotificationDropdown from './NotificationDropdown'
 
 /**
  * Renders a user avatar: profile picture if available, else initials placeholder.
@@ -84,11 +85,21 @@ export default function Navbar() {
                 <i className="bi bi-shield-check me-1"></i> Admin
               </Nav.Link>
             )}
+            
+            <Nav.Link
+              as={Link}
+              to="/search"
+              className={location.pathname === '/search' ? 'active' : ''}
+            >
+              <i className="bi bi-search me-1"></i> Search
+            </Nav.Link>
           </Nav>
 
           {/* Right: user dropdown */}
-          <Nav>
-            <Dropdown align="end">
+          <Nav className="align-items-center">
+            <NotificationDropdown />
+            
+            <Dropdown align="end" className="ms-2">
               <Dropdown.Toggle
                 as="div"
                 style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}

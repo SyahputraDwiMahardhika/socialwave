@@ -1,0 +1,8 @@
+node_modules/
+frontend/node_modules/
+.vite/
+frontend/node_modules/.vite/
+vendor/
+.env
+storage/
+public/storage
