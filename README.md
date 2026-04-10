@@ -104,9 +104,9 @@ Frontend berjalan di: **http://localhost:5173**
 
 | Role  | Email                   | Password |
 |-------|-------------------------|----------|
-| Admin | admin@socialwave.com    | password |
-| User  | budi@example.com        | password |
-| User  | sari@example.com        | password |
+| Admin | admin@socialwave.com    | admin123 |
+| User  | budi@example.com        | 12345678 |
+| User  | sari@example.com        | 12345678 |
 
 Buka browser: **http://localhost:5173**
 
