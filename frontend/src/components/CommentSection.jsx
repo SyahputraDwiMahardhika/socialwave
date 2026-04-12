@@ -36,8 +36,12 @@ function CommentItem({ comment, user, postId, onHashtagClick, handleSaveEdit, ha
   const [editContent, setEditContent] = useState('')
   const [showReplyForm, setShowReplyForm] = useState(false)
   const [replyContent, setReplyContent] = useState('')
+  const [replyImage, setReplyImage] = useState(null)
+  const [replyImagePreview, setReplyImagePreview] = useState(null)
   const [isLiked, setIsLiked] = useState(comment.is_liked ?? false)
   const [likesCount, setLikesCount] = useState(comment.likes_count ?? 0)
+
+  const replyImageRef = useRef()
 
   const handleToggleLike = async () => {
     if (!user) return
@@ -56,8 +60,10 @@ function CommentItem({ comment, user, postId, onHashtagClick, handleSaveEdit, ha
   const submitReply = async (e) => {
     e.preventDefault()
     if (!replyContent.trim() || replyContent.length > MAX_CHARS) return
-    await handleReplySubmit(comment.id, replyContent)
+    await handleReplySubmit(comment.id, replyContent, replyImage)
     setReplyContent('')
+    setReplyImage(null)
+    setReplyImagePreview(null)
     setShowReplyForm(false)
   }
 
@@ -139,10 +145,25 @@ function CommentItem({ comment, user, postId, onHashtagClick, handleSaveEdit, ha
                 maxLength={MAX_CHARS}
                 style={{ resize: 'none', fontSize: '0.8rem' }}
               />
-              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.3rem', justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.3rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+                <label className="btn-sw-ghost py-0 px-2" style={{ cursor: 'pointer', fontSize: '0.75rem', marginRight: 'auto' }}>
+                  <i className="bi bi-image me-1"></i>Photo
+                  <input type="file" accept="image/*" hidden ref={replyImageRef} onChange={e => {
+                    const f = e.target.files[0]; if (!f) return
+                    setReplyImage(f); setReplyImagePreview(URL.createObjectURL(f))
+                  }} />
+                </label>
                 <button type="submit" className="btn-sw-primary py-0" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem' }} disabled={!replyContent.trim()}>Reply</button>
                  <button type="button" className="btn-sw-ghost py-0" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem' }} onClick={() => setShowReplyForm(false)}>Cancel</button>
               </div>
+              {replyImagePreview && (
+                <div className="file-preview mt-1" style={{ maxWidth: 120 }}>
+                  <img src={replyImagePreview} alt="preview" style={{ width: '100%', borderRadius: 4 }} />
+                  <button type="button" className="btn-sw-ghost ms-auto py-0 px-1" onClick={() => { setReplyImage(null); setReplyImagePreview(null); if (replyImageRef.current) replyImageRef.current.value = '' }}>
+                    <i className="bi bi-x"></i>
+                  </button>
+                </div>
+              )}
             </form>
         )}
 
@@ -232,13 +253,16 @@ export default function CommentSection({ postId, initialComments = [], onHashtag
     }
   }
 
-  const handleReplySubmit = async (parentId, replyContent) => {
+  const handleReplySubmit = async (parentId, replyContent, replyImage) => {
     try {
       const formData = new FormData()
       formData.append('content', replyContent)
       formData.append('parent_id', parentId)
+      if (replyImage) formData.append('image', replyImage)
 
-      const res = await api.post(`/posts/${postId}/comments`, formData)
+      const res = await api.post(`/posts/${postId}/comments`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
       
       if (res.data.data.status === 'approved') {
         setComments(prev => prev.map(c => {

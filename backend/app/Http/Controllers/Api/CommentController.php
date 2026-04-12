@@ -124,6 +124,27 @@ class CommentController extends Controller
 
         $comment->load('user:id,name,profile_picture');
 
+        $receiverId = null;
+        if (isset($validated['parent_id'])) {
+            $parentComment = Comment::find($validated['parent_id']);
+            if ($parentComment) $receiverId = $parentComment->user_id;
+        } else {
+            $receiverId = Post::find($postId)->user_id;
+        }
+
+        if ($receiverId && $receiverId !== $request->user()->id) {
+            \App\Models\Notification::create([
+                'user_id' => $receiverId,
+                'type'    => 'comment_post',
+                'data'    => [
+                    'sender_id'   => $request->user()->id,
+                    'sender_name' => $request->user()->name,
+                    'post_id'     => $postId,
+                    'comment_id'  => $comment->id,
+                ]
+            ]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => $moderation['is_flagged']

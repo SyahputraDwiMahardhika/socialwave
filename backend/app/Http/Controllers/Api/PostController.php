@@ -316,6 +316,18 @@ class PostController extends Controller
         } else {
             $post->likes()->create(['user_id' => $userId]);
             $isLiked = true;
+
+            if ($post->user_id !== $userId) {
+                \App\Models\Notification::create([
+                    'user_id' => $post->user_id,
+                    'type'    => 'like_post',
+                    'data'    => [
+                        'sender_id'   => $userId,
+                        'sender_name' => $request->user()->name,
+                        'post_id'     => $post->id,
+                    ]
+                ]);
+            }
         }
 
         return response()->json([

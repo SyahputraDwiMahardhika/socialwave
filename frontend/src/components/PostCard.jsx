@@ -12,6 +12,7 @@
  */
 
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import CommentSection from './CommentSection'
 import PostFormModal from './PostFormModal'
@@ -44,6 +45,7 @@ function renderContent(content, onHashtagClick) {
 
 export default function PostCard({ post, onDeleted, onUpdated, onHashtagClick, showStatus = false }) {
   const { user }                        = useAuth()
+  const navigate                        = useNavigate()
   const [showComments, setShowComments] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [deleting, setDeleting]         = useState(false)
@@ -109,30 +111,37 @@ export default function PostCard({ post, onDeleted, onUpdated, onHashtagClick, s
         )}
 
         {/* Author info */}
-        <div className="post-author">
-          <Avatar user={post.user} size={40} />
-          <div style={{ flex: 1 }}>
-            <div className="author-name">{post.user?.name ?? 'Unknown'}</div>
-            <div className="post-time">
-              {formatRelativeTime(post.created_at)}
+        <div className="post-author" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.8rem' }}>
+          <div 
+            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.8rem', flex: 1 }}
+            onClick={() => navigate(`/user/${post.user.id}`)}
+          >
+            <Avatar user={post.user} size={40} />
+            <div>
+              <div className="author-name" style={{ cursor: 'pointer' }}>
+                {post.user?.name ?? 'Unknown'}
+              </div>
+              <div className="post-time" style={{ cursor: 'default' }} onClick={(e) => e.stopPropagation()}>
+                {formatRelativeTime(post.created_at)}
 
-              {/* Status badge (shown on "My Posts" page via showStatus prop) */}
-              {showStatus && (
-                <span className={`sw-badge ms-2 badge-${post.status}`}>
-                  {post.status}
-                </span>
-              )}
+                {/* Status badge (shown on "My Posts" page via showStatus prop) */}
+                {showStatus && (
+                  <span className={`sw-badge ms-2 badge-${post.status}`}>
+                    {post.status}
+                  </span>
+                )}
 
-              {/* Flagged badge in timestamp row (public feed) */}
-              {post.is_flagged && !showStatus && (
-                <span
-                  className="sw-badge ms-2 badge-flagged"
-                  title="This post has been flagged for review"
-                  style={{ fontSize: '0.65rem' }}
-                >
-                  <i className="bi bi-flag-fill me-1"></i>Flagged
-                </span>
-              )}
+                {/* Flagged badge in timestamp row (public feed) */}
+                {post.is_flagged && !showStatus && (
+                  <span
+                    className="sw-badge ms-2 badge-flagged"
+                    title="This post has been flagged for review"
+                    style={{ fontSize: '0.65rem' }}
+                  >
+                    <i className="bi bi-flag-fill me-1"></i>Flagged
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

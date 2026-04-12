@@ -17,6 +17,8 @@ import RegisterPage    from './pages/RegisterPage'
 import HomePage        from './pages/HomePage'
 import ProfilePage     from './pages/ProfilePage'
 import AdminDashboard  from './pages/AdminDashboard'
+import UserProfilePage from './pages/UserProfilePage'
+import SearchPage      from './pages/SearchPage'
 
 // Layout
 import Navbar from './components/Navbar'
@@ -111,6 +113,8 @@ function AppRoutes() {
         {/* Protected routes */}
         <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/user/:id" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
+        <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
 
         {/* Admin-only route */}
         <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
